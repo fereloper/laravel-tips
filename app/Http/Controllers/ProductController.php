@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductStoreRequest;
+use App\Http\Requests\ProductUpdateRequest;
 use App\Models\Product;
-use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -20,22 +21,12 @@ class ProductController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param ProductStoreRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(ProductStoreRequest $request)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string',
-            'category_id' => 'required|exists:category,id',
-        ]);
-
-        $product = Product::create([
-            'name' => $validatedData['name'],
-            'type' => $validatedData['type'],
-            'category_id' => $validatedData['category_id'],
-        ]);
+        $product = $request->commit();
 
         return response()->json([
             'data' => $product
@@ -43,23 +34,13 @@ class ProductController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param ProductUpdateRequest $request
      * @param Product $product
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Product $product)
+    public function update(ProductUpdateRequest $request, Product $product)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string',
-            'category_id' => 'required|exists:category,id',
-        ]);
-
-        $product->name = $validatedData['name'];
-        $product->type = $validatedData['type'];
-        $product->category_id = $validatedData['category_id'];
-
-        $product->save();
+        $request->commit($product);
 
         return response()->json([
             'data' => $product
